@@ -6,6 +6,26 @@
     <title>LeBronSaif</title>
 </head>
 <body>
-   <h1>Hello Saif!</h1> 
+    {% if followers %}
+    {% for follower in followers %}
+       <ul> 
+            <li> {{follower}} </li>
+       </ul>
+    {% endfor %}
+    {% endif %}
+       <h1>{{counts.followers_count}} </h1>
+       <h1>{{counts.followed_count}} </h1>
+    {% if lebrons %}
+    {% for lebron in lebrons  %}
+       <ul> 
+            <li> {{lebron.lebron}} </li>
+       </ul>
+    {% endfor %}
+    {% endif %}
+   <form method="post">
+    {% csrf_token %}
+    {{form.as_p}}
+    <button type="submit">LeBron</button>
+   </form>
 </body>
 </html>

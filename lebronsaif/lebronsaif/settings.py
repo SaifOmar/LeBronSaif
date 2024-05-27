@@ -16,6 +16,11 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+
+GOOGLE_CLIENT_ID = "485015710012-9kfhms33h26hhnsohlqp3al335fc5fck.apps.googleusercontent.com"
+
+GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/users/callback"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -123,3 +128,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'saifelyas722@gmail.com'
+
+# DEFAULT_EMAIL_FROM = 'saifelysa722@gmail.com'
+
+AUTH_USER_MODEL = 'users.CustomUser'

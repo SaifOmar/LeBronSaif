@@ -8,4 +8,5 @@ urlpatterns = [
     path("pending_verification",views.PendingVerification.as_view(),name="pending_verification"),
     path("check_verification",views.CheckVerification.as_view(),name="check_verification"),
     path("verification_compelete",views.VerificationComplete.as_view(),name="verification_complete"),
+    path("callback",views.CallBack.as_view(),name="callback"),
 ]
