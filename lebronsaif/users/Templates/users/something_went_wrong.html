@@ -1,0 +1,14 @@
+{% extends 'users/base.html' %}
+
+
+{% block title %}You Are Dumb Af{% endblock%}
+{% block body %}
+
+{% if messages %}
+{% for message in messages  %}
+<h1>{{message}}</h1>
+{% endfor %}
+{% endif %}
+
+
+{% endblock %}

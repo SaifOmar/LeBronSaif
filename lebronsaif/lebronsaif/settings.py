@@ -18,7 +18,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 GOOGLE_CLIENT_ID = "485015710012-9kfhms33h26hhnsohlqp3al335fc5fck.apps.googleusercontent.com"
-
 GOOGLE_REDIRECT_URI = "http://127.0.0.1:8000/users/callback"
 
 # Quick-start development settings - unsuitable for production
@@ -32,6 +31,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
+AUTHENTICATION_BACKENDS = [
+    'users.backends.MyBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # Application definition
 
@@ -44,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'users',
+    # 'bootstrap5'
 ]
 
 MIDDLEWARE = [
@@ -122,7 +128,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+# Add this below line in settings.py
+STATICFILES_DIRS = [
+    BASE_DIR / "static",]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -134,7 +143,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'saifelyas722@gmail.com'
-
 # DEFAULT_EMAIL_FROM = 'saifelysa722@gmail.com'
 
-AUTH_USER_MODEL = 'users.CustomUser'
+
+

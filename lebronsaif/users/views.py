@@ -19,11 +19,20 @@ from  main.views import Home
 
 class Loged_in(View):
     def get(self,request):
-        return render(request, "Loged_in.html")
+        return render(request, "users/Loged_in.html")
+
+class Logout(View):
+    html_template = "users/logedout.html"
+    def get(self, request):
+        logout(request)
+        return render(request,self.html_template)
+    
 
 class Login(View):
-    html_template = "login.html"
+    html_template = "users/login.html"
     def get(self, request):
+        if request.user.is_authenticated :
+            return redirect('main:home')
         form = LoginForm()
         context = {"form": form}
         return render(request,self.html_template, context)
@@ -32,27 +41,32 @@ class Login(View):
         form = LoginForm(request.POST)
         context = {"form": form}
         if form.is_valid():
-            email = form.cleaned_data["email"]
+            e_u_p = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
+            print(e_u_p,password)
             try :
-                user = authenticate(request,u_e_p = email,password = password)
+                user = authenticate(u_e_p = e_u_p, password = password)
+                print(user)
             except : 
                 user = None
+                print(user)
                 messages.error(request,"We couldn't log you in with these creds")
-                return render(request, self.html_template, context)
+                return redirect('users:login')
             if user :
                 login(request, user)
                 if not user.is_verified :
-                    return redirect(VerifiyEmail)
-                return redirect(Loged_in)
+                    return redirect('users:verifiy_email')
+                return redirect('users:logged_in')
             else :
-                return redirect(Login) 
+                print(user)
+                messages.error(request,"tbd")
+                return redirect('users:login') 
         return render(request, self.html_template, context)
     
 
 
 class SignUp(View):
-    html_template = "signup.html"
+    html_template = "users/signup.html"
     def get(self, request):
         form = SignUpForm()
         context = {"form":form}
@@ -62,61 +76,62 @@ class SignUp(View):
         form = SignUpForm(request.POST)
         context = {"form": form}
         if form.is_valid():
-            form.save()
-        else :
-            return redirect(Home)
+            password=form.cleaned_data['password']
+            user = form.save()
+            user.set_password(password)
+            user.save()
+            return redirect('main:home')
         return render(request, self.html_template,context)
     
 
 # @login_required
-class Logout(View):
-    html_template = "logedout.html"
-    def get(self, request):
-        logout(request)
-        return render(request,self.html_template)
 
 
 class VerifiyEmail(View):
-    html_template = "verifiy_email.html"
+    html_template = "user/verifiy_email.html"
     def post(self,request):
-        if user.is_verified != True :
-            domain = get_current_site(request)
-            user = request.user
-            email = request.user.email
-            name = request.user.first_name
-            subject = "Please verifiy your email"
-            html_content = "verifiymsg.html"
-            message = render_to_string(
-                html_content,{
-                    "name": name,
-                    "request": request,
-                    "domain": domain.domain,
-                    "user": user,
-                    "uid":urlsafe_base64_encode(force_bytes(user.pk)),
-                    "token": account_activation_token.make_token(user),
-                }
-            )
+        if request.user.is_authenticated:
+            if request.user.is_verified != True :
+                domain = get_current_site(request)
+                user = request.user
+                email = request.user.email
+                name = request.user.first_name
+                subject = "Please verifiy your email"
+                html_content = "users/verifiymsg.html"
+                message = render_to_string(
+                    html_content,{
+                        "name": name,
+                        "request": request,
+                        "domain": domain.domain,
+                        "user": user,
+                        "uid":urlsafe_base64_encode(force_bytes(user.pk)),
+                        "token": account_activation_token.make_token(user),
+                    }
+                )
 
-            emai = EmailMessage(
-                subject,message,to=[emai] 
-            )
-            email.conetet_subtype = "html"        
-            email.send()
-            return redirect(PendingVerification)
-        else : return redirect(AlreadyVerified)
+                email = EmailMessage(
+                    subject,message,to=[email] 
+                )
+                email.content_subtype = "html"        
+                email.send()
+                return redirect('users:pending_verification')
+            else : return redirect("users:already_verified")
+        else : 
+            messages.error(request,"You need to login first!")
+            return redirect('users:login')
     def get(self,request):
-       return render(request,"verifiy_email")
+       return render(request,"users/verifiy_email.html")
 
         
 class AlreadyVerified(View):
-    html_template= "already_verified.html"
+    html_template= "users/already_verified.html"
     def get(self,request):
         return render(request,self.html_template)
     
 class CheckVerification(View):
-    def get(self,request, uid64, token):
+    def get(self,request, uidb64, token):
         try :
-            uid = urlsafe_base64_decode(force_str(uid64))
+            uid = urlsafe_base64_decode(force_str(uidb64))
             user = CustomUser.objects.get(pk = uid)
         except :
             (TypeError,ValueError,CustomUser.DoesNotExist,OverflowError)
@@ -124,19 +139,20 @@ class CheckVerification(View):
         if user is not None and account_activation_token.check_token(user,token):
             user.is_verified = True
             user.save()
-            return redirect(VerificationComplete)
+            return redirect('users:verification_complete')
         else :
             messages.warning(request,"link is invalid")
-        return render(request, "checkverification") 
+            return redirect('users:smth_blew_up')
+        # return render(request, "checkverification.html") 
 
 
 class VerificationComplete(View):
-    html_template = "verificationcomplete.html"
+    html_template = "users/verification_complete.html"
     def get(self,request):
         return render(request,self.html_template)
 
 class PendingVerification(View):
-    html_template = "pending_verification.html"
+    html_template = "users/pending_verification.html"
     def get(self,request):
         return render(request,self.html_template)
 
@@ -157,7 +173,7 @@ class ChangePassword(View):
             else :
                 messages.error(request,"Please make sure that both passwords match")
         else : 
-            return redirect(ChangePassword)
+            return redirect('users:change_password')
         return render(request,"password_changed.html")
 
 
@@ -190,7 +206,7 @@ class ForgotPassword(View):
             send_email = EmailMessage(subject,message,to=[email])
             send_email.content_subtype = 'html'
             send_email.send()
-            return render(request,"pending_password_change.html")
+            return render(request,"users/pending_password_change.html")
         else :
             messages.error("We couldn't find an account that has this email")
 
@@ -207,13 +223,17 @@ class ValidatePasswordChange(View):
         if user is not None and account_activation_token.check_token(user,token):
             if user.is_authenticated == False:
                 login(request,user)
-                return redirect(ChangePassword)
+                return redirect('users:change_password')
             else :
-                return redirect(ChangePassword)
+                return redirect('users:change_password')
         else :
             messages.error(request,"Invalid link plase try again")
-            return render(request,"password_change_failed.html") 
+            return redirect('users:something_went_wrong') 
 
+class SomethingWentWrong(View):
+    html_template= 'users/something_went_wrong.html'
+    def get(self, request):
+        return render(request,self.html_template)
 
 class SocialLogin(View):
     def get(self,reuqest):
@@ -251,7 +271,7 @@ class CallBack(View):
 
         if user :
             login(request,user)
-            return redirect(Home)
+            return redirect('main:home')
         
         elif not user :
             try :
@@ -262,10 +282,11 @@ class CallBack(View):
                 last_name = user_info["family_name"],
                                       )
                 login(request,user)
-                return redirect(Loged_in)
+                return redirect('users:logged_in')
             except :
                 (ValueError,TypeError,OverflowError)
-                return messages.error(request,"we failed to log you in")
+                messages.error(request,"we failed to log you in")
+                return redirect('users:something_went_wrong')
         else :
             return render(request,"something_blew_up.html")
 

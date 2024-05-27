@@ -7,6 +7,7 @@ from .models import LeBrons,Followers
 from django.db.models import Q
 from .forms import NewLebronForm
 from django.utils.timezone import now
+from django.contrib import messages
 # Create your views here.
 
 class Home(View):
@@ -29,7 +30,8 @@ class Home(View):
             "form"      : form,
             } 
             return render(request,self.template_name,context) 
-        return render(request,"smth.html")
+        return redirect('users:login')
+
     
     def post(self, request):
         pk = request.user.pk
@@ -39,7 +41,8 @@ class Home(View):
             img = form.cleaned_data["image"]
             lebron = form.cleaned_data["lebron"]
             LeBrons.objects.create(image=img , lebron=lebron, lebroner = user)
-            return redirect('home')
+            messages.success(request,"You LeBroned !")
+            return redirect('main:home')
 
 
 
